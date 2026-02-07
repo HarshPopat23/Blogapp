@@ -44,13 +44,13 @@ function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <Container>
         <nav className="flex items-center justify-between py-3">
-          {/* Logo */}
+        
           <Link to="/" className="flex items-center gap-2">
             <Logo width="60px" />
             
           </Link>
 
-          {/* Navigation */}
+          
           <ul className="flex items-center gap-2">
             {navItems.map(
               (item) =>
@@ -66,7 +66,7 @@ function Header() {
                 )
             )}
 
-            {/* Logout */}
+            
             {authStatus && (
               <li className="ml-2">
                 <LogoutBtn />

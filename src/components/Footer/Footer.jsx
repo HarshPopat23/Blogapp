@@ -9,7 +9,7 @@ function Footer() {
     <section className="relative overflow-hidden py-12 bg-gray-200 border-t-2 border-black">
       <div className="relative z-10 mx-auto max-w-7xl px-4">
         <div className="flex flex-wrap -m-6">
-          {/* Brand/Logo Section */}
+          
           <div className="w-full p-6 md:w-1/2 lg:w-5/12">
             <div className="flex h-full flex-col justify-between">
               <div>

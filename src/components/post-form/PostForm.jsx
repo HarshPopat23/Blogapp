@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini
+
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 function PostForm({ post }) {
@@ -24,7 +24,7 @@ function PostForm({ post }) {
     const navigate = useNavigate()
     const userData = useSelector((state) => state.auth.userData) 
 
-    // --- AI ENHANCEMENT LOGIC (Updated Step 2 Logic) ---
+
     const handleAiEnhance = async (e) => {
     e.preventDefault();
 
@@ -158,3 +158,6 @@ TASK:
 }
 
 export default PostForm;
+
+
+

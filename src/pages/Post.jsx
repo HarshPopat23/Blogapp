@@ -12,7 +12,6 @@ export default function Post() {
 
     const userData = useSelector((state) => state.auth.userData);
 
-    // FIXED: Changed post.userId to post.userID to match your Appwrite attribute
     const isAuthor = post && userData ? post.userID === userData.$id : false;
 
     useEffect(() => {
@@ -27,7 +26,6 @@ export default function Post() {
     const deletePost = () => {
         appwriteService.deletePost(post.$id).then((status) => {
             if (status) {
-                // FIXED: Changed post.featuredImage to post.featuredimage
                 appwriteService.deleteFile(post.featuredimage);
                 navigate("/");
             }
@@ -39,7 +37,6 @@ export default function Post() {
             <Container>
                 <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
                     <img
-                        // FIXED: Changed post.featuredImage to post.featuredimage
                         src={appwriteService.getFileView(post.featuredimage)}
                         alt={post.title}
                         className="rounded-xl"

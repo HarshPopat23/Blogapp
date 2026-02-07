@@ -49,7 +49,7 @@ function Home() {
     if (authStatus === false) {
         return (
             <div className={styles.homeWrapper}>
-      {/* 1. Hero Section */}
+      
       <section className={styles.heroSection}>
         <Container>
           <div className={styles.heroContent}>
@@ -75,7 +75,7 @@ function Home() {
 
     
 
-      {/* 3. Features Grid Section */}
+  
       <section className={styles.featuresSection} id="features">
         <Container>
           <div className={styles.sectionHeader}>
@@ -108,7 +108,7 @@ function Home() {
       <section className={styles.aiTutorSection}>
         <Container>
           <div className={styles.aiTutorContainer}>
-            {/* Left Side: Mock Chatbox */}
+          
             <div className={styles.chatBoxWrapper}>
               <div className={styles.chatHeader}>
                 <div className={styles.botIcon}>🤖</div>
@@ -128,7 +128,7 @@ function Home() {
               </div>
             </div>
 
-            {/* Right Side: Features List */}
+            
             <div className={styles.aiTutorContent}>
               <div className={styles.miniBadge}>AI Assistant</div>
               <h2 className={styles.aiTitle}>Your Personal <span className={styles.aiHighlight}>AI Tutor</span></h2>

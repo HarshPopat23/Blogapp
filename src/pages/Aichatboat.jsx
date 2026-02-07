@@ -11,7 +11,7 @@ export default function AiChat() {
     const userMessage = input;
     setInput("");
 
-    // show user message immediately
+
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
     setLoading(true);
 
@@ -46,7 +46,7 @@ export default function AiChat() {
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-gray-100">
-      {/* Sidebar */}
+     
       <aside className="w-64 bg-white border-r p-4 hidden md:block">
         <h2 className="text-xl font-bold mb-4">🧠 QEconsePta</h2>
 
@@ -62,7 +62,7 @@ export default function AiChat() {
         </div>
       </aside>
 
-      {/* Chat Area */}
+   
       <main className="flex-1 flex flex-col">
         <header className="bg-white border-b p-4 font-semibold">
           AI Chatbot
