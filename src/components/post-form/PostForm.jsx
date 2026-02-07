@@ -1,11 +1,181 @@
-import React, { useCallback } from 'react'
+// import React, { useCallback } from 'react'
+// import { useForm } from 'react-hook-form'
+// import { Button, Input, Select, RTE } from '../index'
+// import appwriteService from "../../appwrite/config" 
+// import { useNavigate } from 'react-router-dom'
+// import { useSelector } from 'react-redux'
+
+// function PostForm({ post }) {
+//     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
+//         defaultValues: {
+//             title: post?.title || '',
+//             slug: post?.$id || post?.slug || '', 
+//             content: post?.content || '',
+//             status: post?.status || 'active',
+//         },
+//     })
+
+//     const navigate = useNavigate()
+//     const userData = useSelector((state) => state.auth.userData) 
+    
+//     const submit = async (data) => {
+//         // 1. Check if user is logged in
+//         if (!userData) {
+//             alert("You must be logged in to post!");
+//             return;
+//         }
+
+//         if (post) {
+//             // EDIT POST LOGIC
+//             const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null
+            
+//             if (file) {
+//                 // Delete the old file
+//                 appwriteService.deleteFile(post.featuredimage)
+//             }
+
+//             const dbPost = await appwriteService.updatePost(
+//                 post.$id, {
+//                     ...data,
+//                     featuredimage: file ? file.$id : post.featuredimage,
+//                 }   
+//             )
+
+//             if (dbPost) {
+//                 navigate(`/post/${dbPost.$id}`)
+//             } 
+//         } else {
+//             // CREATE POST LOGIC
+//             const file = await appwriteService.uploadFile(data.image[0]);
+
+//             if (file) {
+//                 const fileId = file.$id
+//                 data.featuredimage = fileId
+                
+//                 const dbPost = await appwriteService.createPost({
+//                     ...data,
+//                     userID: userData.$id, // Correct key for your config.js
+//                 })
+
+//                 if (dbPost) {
+//                     navigate(`/post/${dbPost.$id}`)
+//                 }
+//             }
+//         }
+//     }
+//     let title1 ="";
+
+//     const slugTransform = useCallback((value) => {
+//         if (value && typeof value === 'string') 
+//             return value
+//                 .trim()
+//                 .toLowerCase()
+//                 .replace(/[^a-zA-Z\d\s]+/g, '-') 
+//                 .replace(/\s/g, '-')
+
+//         return ''
+//     }, [])
+
+//     React.useEffect(() => {
+//         const subscription = watch((value, { name }) => {
+//             if (name === 'title') {
+//                 setValue('slug', slugTransform(value.title), { shouldValidate: true })
+//             }
+//         })
+
+//         return () => subscription.unsubscribe()
+//     }, [watch, slugTransform, setValue])
+
+//     // UI Guard for random/unlogged users
+//     if (!userData) {
+//         return (
+//             <div className="w-full text-center py-8">
+//                 <h1 className="text-2xl font-bold text-gray-700">
+//                     Please Login to create or edit posts.
+//                 </h1>
+//             </div>
+//         )
+//     }
+    
+//     return (
+//         <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
+//             <div className="w-2/3 px-2">
+//                 <Input
+//                     label="Title :"
+//                     placeholder="Title"
+//                     className="mb-4"
+//                     {...register("title", { required: true })}
+//                 />
+//                 <Input
+//                     label="Slug :"
+//                     placeholder="Slug"
+//                     className="mb-4"
+//                     {...register("slug", { required: true })}
+//                     onInput={(e) => {
+//                         setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
+//                     }}
+//                 />
+//                 <RTE label="Content :" name="content" control={control} defaultValue={getValues("content")} />
+//             </div>
+//             <div className="w-1/3 px-2">
+//                 <Input
+//                     label="Featured Image :"
+//                     type="file"
+//                     className="mb-4"
+//                     accept="image/png, image/jpg, image/jpeg, image/gif"
+//                     {...register("image", { required: !post })}
+//                 />
+//                 {post && (
+//                     <div className="w-full mb-4">
+//                         <img
+//                             src={appwriteService.getFilePreview(post.featuredimage)}
+//                             alt={post.title}
+//                             className="rounded-lg"
+//                         />
+//                     </div>
+//                 )}
+//                 <Select
+//                     options={["active", "inactive"]}
+//                     label="Status"
+//                     className="mb-4"
+//                     {...register("status", { required: true })}
+//                 />
+//                 <Button 
+//                     type="submit" 
+//                     bgColor={post ? "bg-green-500" : undefined} 
+//                     className="w-full"
+//                 >
+//                     {post ? "Update" : "Submit"}
+//                 </Button>
+               
+//                 <Button 
+//                     type="submit" 
+//                     bgColor={post ? "bg-green-500" : undefined} 
+//                     className="w-full"
+//                 >
+//                     {post ? "Update" : "AI-Inhanced"}
+//                 </Button>
+//             </div>
+//         </form>
+//     );
+// }
+
+// export default PostForm;
+
+import React, { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button, Input, Select, RTE } from '../index'
 import appwriteService from "../../appwrite/config" 
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 function PostForm({ post }) {
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    
     const { register, handleSubmit, watch, setValue, control, getValues } = useForm({
         defaultValues: {
             title: post?.title || '',
@@ -17,61 +187,87 @@ function PostForm({ post }) {
 
     const navigate = useNavigate()
     const userData = useSelector((state) => state.auth.userData) 
-    
+
+    // --- AI ENHANCEMENT LOGIC (Updated Step 2 Logic) ---
+    const handleAiEnhance = async (e) => {
+    e.preventDefault();
+
+    const topic = getValues("title");
+    const content = getValues("content");
+
+    if (!topic) {
+        alert("Please enter a title first!");
+        return;
+    }
+
+    setIsAiLoading(true);
+    try {
+        const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        });
+
+        const prompt = `
+You are an expert educator.
+
+TOPIC: ${topic}
+
+EXISTING CONTENT:
+${content || "No content provided."}
+
+TASK:
+1. Provide a structured, high-quality educational explanation.
+2. Add missing details or examples.
+3. Use Markdown (headings, bullet points, examples).
+        `;
+
+        const result = await model.generateContent(prompt);
+        setValue("content", result.response.text(), {
+    shouldDirty: true,
+    shouldTouch: true,
+    shouldValidate: true,
+});
+
+
+    } catch (error) {
+        console.error("Gemini Error:", error);
+        alert("AI enhancement failed. Check API key or quota.");
+    } finally {
+        setIsAiLoading(false);
+    }
+};
+
+
     const submit = async (data) => {
-        // 1. Check if user is logged in
         if (!userData) {
             alert("You must be logged in to post!");
             return;
         }
 
         if (post) {
-            // EDIT POST LOGIC
             const file = data.image[0] ? await appwriteService.uploadFile(data.image[0]) : null
-            
-            if (file) {
-                // Delete the old file
-                appwriteService.deleteFile(post.featuredimage)
-            }
+            if (file) appwriteService.deleteFile(post.featuredimage)
 
-            const dbPost = await appwriteService.updatePost(
-                post.$id, {
-                    ...data,
-                    featuredimage: file ? file.$id : post.featuredimage,
-                }   
-            )
-
-            if (dbPost) {
-                navigate(`/post/${dbPost.$id}`)
-            } 
+            const dbPost = await appwriteService.updatePost(post.$id, {
+                ...data,
+                featuredimage: file ? file.$id : post.featuredimage,
+            })
+            if (dbPost) navigate(`/post/${dbPost.$id}`)
         } else {
-            // CREATE POST LOGIC
             const file = await appwriteService.uploadFile(data.image[0]);
-
             if (file) {
-                const fileId = file.$id
-                data.featuredimage = fileId
-                
                 const dbPost = await appwriteService.createPost({
                     ...data,
-                    userID: userData.$id, // Correct key for your config.js
+                    featuredimage: file.$id,
+                    userID: userData.$id,
                 })
-
-                if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`)
-                }
+                if (dbPost) navigate(`/post/${dbPost.$id}`)
             }
         }
     }
 
     const slugTransform = useCallback((value) => {
         if (value && typeof value === 'string') 
-            return value
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-zA-Z\d\s]+/g, '-') 
-                .replace(/\s/g, '-')
-
+            return value.trim().toLowerCase().replace(/[^a-zA-Z\d\s]+/g, '-').replace(/\s/g, '-')
         return ''
     }, [])
 
@@ -81,71 +277,44 @@ function PostForm({ post }) {
                 setValue('slug', slugTransform(value.title), { shouldValidate: true })
             }
         })
-
         return () => subscription.unsubscribe()
     }, [watch, slugTransform, setValue])
 
-    // UI Guard for random/unlogged users
     if (!userData) {
-        return (
-            <div className="w-full text-center py-8">
-                <h1 className="text-2xl font-bold text-gray-700">
-                    Please Login to create or edit posts.
-                </h1>
-            </div>
-        )
+        return <div className="w-full text-center py-8"><h1 className="text-2xl font-bold">Please Login.</h1></div>
     }
     
     return (
         <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
             <div className="w-2/3 px-2">
-                <Input
-                    label="Title :"
-                    placeholder="Title"
-                    className="mb-4"
-                    {...register("title", { required: true })}
-                />
-                <Input
-                    label="Slug :"
-                    placeholder="Slug"
-                    className="mb-4"
-                    {...register("slug", { required: true })}
-                    onInput={(e) => {
-                        setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true });
-                    }}
-                />
+                <Input label="Title :" placeholder="Title" className="mb-4" {...register("title", { required: true })} />
+                <Input label="Slug :" placeholder="Slug" className="mb-4" {...register("slug", { required: true })} 
+                    onInput={(e) => { setValue("slug", slugTransform(e.currentTarget.value), { shouldValidate: true }); }} />
                 <RTE label="Content :" name="content" control={control} defaultValue={getValues("content")} />
             </div>
             <div className="w-1/3 px-2">
-                <Input
-                    label="Featured Image :"
-                    type="file"
-                    className="mb-4"
-                    accept="image/png, image/jpg, image/jpeg, image/gif"
-                    {...register("image", { required: !post })}
-                />
+                <Input label="Featured Image :" type="file" className="mb-4" accept="image/*" {...register("image", { required: !post })} />
                 {post && (
                     <div className="w-full mb-4">
-                        <img
-                            src={appwriteService.getFilePreview(post.featuredimage)}
-                            alt={post.title}
-                            className="rounded-lg"
-                        />
+                        <img src={appwriteService.getFilePreview(post.featuredimage)} alt={post.title} className="rounded-lg" />
                     </div>
                 )}
-                <Select
-                    options={["active", "inactive"]}
-                    label="Status"
-                    className="mb-4"
-                    {...register("status", { required: true })}
-                />
-                <Button 
-                    type="submit" 
-                    bgColor={post ? "bg-green-500" : undefined} 
-                    className="w-full"
-                >
-                    {post ? "Update" : "Submit"}
+                <Select options={["active", "inactive"]} label="Status" className="mb-4" {...register("status", { required: true })} />
+                
+                <Button type="submit" bgColor={post ? "bg-green-500" : "bg-blue-500"} className="w-full mb-2">
+                    {post ? "Update Post" : "Publish Post"}
                 </Button>
+                
+                {!post && (
+                    <Button 
+                        type="button" 
+                        onClick={handleAiEnhance}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                        disabled={isAiLoading}
+                    >
+                        {isAiLoading ? "AI is thinking..." : "✨ AI-Enhanced"}
+                    </Button>
+                )}
             </div>
         </form>
     );

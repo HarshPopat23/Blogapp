@@ -30,8 +30,13 @@ function Header() {
       active: authStatus,
   },
   {
-      name: "Add Post",
+      name: "Notes",
       slug: "/add-post",
+      active: authStatus,
+  },
+  {
+      name: "Aichat Bot",
+      slug: "/aichat",
       active: authStatus,
   },
   ]
