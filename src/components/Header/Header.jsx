@@ -38,6 +38,12 @@ function Header() {
       slug: "/aichat",
       active: authStatus,
     },
+// Inside Header.jsx navItems array
+{
+  name: "Dashboard",
+  slug: "/dashboard", // Changed from /Dash-board to /dashboard
+  active: authStatus,
+},
   ];
 
   return (
